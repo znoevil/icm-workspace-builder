@@ -27,7 +27,7 @@ Stages form a one-way pipeline. Each stage reads the previous stage's manifest t
 
 ```
                     manifest.md              manifest.md
- ┌──────────┐      ──────────>  ┌──────────┐ ──────────>  ┌──────────┐
+ ┌──────────┐      ──────────>  ┌──────────┐ ──────────>    ┌──────────┐
  │ 01-ingest│                   │ 02-draft │                │ 03-review│
  │          │  reads _config/   │          │  reads 01/     │          │  reads 02/
  │  do work │  writes output/   │  do work │  writes output/│  do work │  writes output/
