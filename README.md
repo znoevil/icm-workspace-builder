@@ -10,131 +10,54 @@ ICM Workspace Builder turns workflow descriptions into numbered-folder workspace
 
 Each workspace organises information into five layers. The agent loads only the layers relevant to the current stage -- typically 2,000-8,000 tokens instead of the entire workspace.
 
-```mermaid
-block-beta
-    columns 3
-
-    block:L0:3
-        columns 3
-        l0["Layer 0"] space:2
-    end
-
-    block:L0d:3
-        columns 3
-        claude["CLAUDE.md"] space:2
-    end
-
-    block:L1:3
-        columns 3
-        l1["Layer 1"] space:2
-    end
-
-    block:L1d:3
-        columns 3
-        context["CONTEXT.md"] space:2
-    end
-
-    block:L2:3
-        columns 3
-        l2["Layer 2"] space:2
-    end
-
-    block:L2d:3
-        columns 3
-        stage1["01-research/CONTEXT.md"] stage2["02-draft/CONTEXT.md"] stage3["03-review/CONTEXT.md"]
-    end
-
-    block:L3:3
-        columns 3
-        l3["Layer 3 -- Stable"] space:2
-    end
-
-    block:L3d:3
-        columns 3
-        refs["references/"] config["_config/"] shared["shared/"]
-    end
-
-    block:L4:3
-        columns 3
-        l4["Layer 4 -- Per Run"] space:2
-    end
-
-    block:L4d:3
-        columns 3
-        out1["01/output/"] out2["02/output/"] out3["03/output/"]
-    end
-
-    style L0 fill:#e8f4f8,stroke:#2b6cb0
-    style L1 fill:#e8f4f8,stroke:#2b6cb0
-    style L2 fill:#e8f4f8,stroke:#2b6cb0
-    style L3 fill:#fff3e0,stroke:#c05621
-    style L4 fill:#f0fff4,stroke:#276749
+```
+Layer 0  CLAUDE.md                  "Where am I?"          ~800 tokens
+Layer 1  CONTEXT.md                 "Where do I go?"       ~300 tokens
+Layer 2  stages/0N/CONTEXT.md       "What do I do?"        200-500 tokens
+Layer 3  references/ _config/       "What rules apply?"    500-2k tokens    (stable)
+Layer 4  stages/0N/output/          "What am I working     varies           (per run)
+                                     with?"
 ```
 
-| Layer | Loads | Changes between runs? |
-|-------|-------|----------------------|
-| 0 -- Identity | `CLAUDE.md` | No |
-| 1 -- Routing | `CONTEXT.md` | No |
-| 2 -- Stage contract | `stages/0N/CONTEXT.md` | No |
-| 3 -- Reference | `references/`, `_config/`, `shared/` | No (set at setup) |
-| 4 -- Working artifacts | `stages/0N/output/` | Yes (each run) |
+Layers 0-2 are structural routing -- they don't change between runs. Layer 3 is reference material set at setup. Layer 4 is the working product of each run.
 
 ## How stages pass work forward
 
 Stages form a one-way pipeline. Each stage reads the previous stage's manifest to discover exact filenames, does its job, writes output, and updates pipeline state.
 
-```mermaid
-flowchart LR
-    subgraph Stage 1
-        A1[Read _config/] --> A2[Do work]
-        A2 --> A3[Write output/manifest.md]
-    end
-
-    subgraph Stage 2
-        B1[Read Stage 1 manifest] --> B2[Load listed artifacts]
-        B2 --> B3[Do work]
-        B3 --> B4[Write output/manifest.md]
-    end
-
-    subgraph Stage 3
-        C1[Read Stage 2 manifest] --> C2[Load listed artifacts]
-        C2 --> C3[Do work]
-        C3 --> C4[Write output/manifest.md]
-    end
-
-    A3 -->|manifest| B1
-    B4 -->|manifest| C1
 ```
+                    manifest.md              manifest.md
+ ┌──────────┐      ──────────>  ┌──────────┐ ──────────>  ┌──────────┐
+ │ 01-ingest│                   │ 02-draft │                │ 03-review│
+ │          │  reads _config/   │          │  reads 01/     │          │  reads 02/
+ │  do work │  writes output/   │  do work │  writes output/│  do work │  writes output/
+ └──────────┘                   └──────────┘                └──────────┘
+```
+
+Each stage writes `output/manifest.md` listing every artifact it produced. The next stage reads that manifest first to get exact filenames -- never hardcoded paths.
 
 ## Mode detection
 
-The skill operates in three modes based on what you ask and whether a workspace already exists.
-
-```mermaid
-flowchart TD
-    Start([User message]) --> Exists{Workspace exists\nat target path?}
-
-    Exists -->|No| Workflow{Describes\na workflow?}
-    Workflow -->|Yes| Build[Build Mode\nScaffold full workspace]
-    Workflow -->|No| Advisory[Advisory Mode\nAnswer with MWP patterns]
-
-    Exists -->|Yes| What{What does\nthe user want?}
-    What -->|Add stages| Update[Update Mode\nAdd stages + patch routing]
-    What -->|Structural question| Advisory
-    What -->|New workflow| Clarify[Ask: new workspace\nor add stages?]
+```
+User message
+  │
+  ├── Workspace exists at target path?
+  │     ├── No  ── Describes a workflow? ── Yes ──> BUILD (scaffold full workspace)
+  │     │                                   No ───> ADVISORY (answer with MWP patterns)
+  │     │
+  │     └── Yes ── Wants to add stages? ────────── > UPDATE (add stages, patch routing)
+  │                Structural question? ──────────> ADVISORY
+  │                Describes new workflow? ────────> Ask: new workspace or add stages?
 ```
 
 ## Parallel branches
 
 When stages can run independently, they share the same number with letter suffixes. A merge stage at the next number synthesises both.
 
-```mermaid
-flowchart LR
-    S0[00-ingest] --> S1A[01a-security-scan]
-    S0 --> S1B[01b-compliance-check]
-    S1A --> S2[02-merge]
-    S1B --> S2
-    S2 --> S3[03-report]
+```
+                    ┌─── 01a-security-scan ───┐
+ 00-ingest ────────>│                         ├──> 02-merge ──> 03-report
+                    └─── 01b-compliance-check─┘
 ```
 
 ## What gets generated
