@@ -43,7 +43,7 @@ User message
   │
   ├── Workspace exists at target path?
   │     ├── No  ── Describes a workflow? ── Yes ──> BUILD (scaffold full workspace)
-  │     │                                   No ───> ADVISORY (answer with MWP patterns)
+  │     │                                   No ───> ADVISORY (answer with MWP conventions)
   │     │
   │     └── Yes ── Wants to add stages? ────────── > UPDATE (add stages, patch routing)
   │                Structural question? ──────────> ADVISORY
@@ -115,12 +115,14 @@ Or ask structural questions:
 > "Should this be one stage or two?"
 > "Where does this config file belong?"
 
-## Patterns
+## Conventions and Archetypes
 
-The skill implements 22 MWP patterns documented in `references/mwp-conventions.md`:
+The skill implements 16 core conventions (always apply) and 3 archetypes (apply when triggered), documented in `references/mwp-conventions.md`:
 
-| # | Pattern | Purpose |
-|---|---------|---------|
+**Core Conventions**
+
+| # | Convention | Purpose |
+|---|-----------|---------|
 | 1 | Stage Contracts | Inputs/Process/Outputs structure for every stage |
 | 2 | Stage Handoffs | Output folders + manifest-based file discovery |
 | 3 | One-Way References | No back-references; downstream reads upstream only |
@@ -131,18 +133,20 @@ The skill implements 22 MWP patterns documented in `references/mwp-conventions.m
 | 8 | Questionnaire Design | Flat, all-at-once, derive what you can |
 | 9 | Bundled Skills | Claude Code skills inside the workspace |
 | 10 | Specs Are Contracts | WHAT and WHEN, not HOW |
-| 11 | Checkpoints | Human steering between creative steps |
+| 11 | Checkpoints | Human steering + autonomy flag for unattended runs |
 | 12 | Stage Audits | Self-check before writing to output |
 | 13 | Value Validation | Agree on value types before creating |
 | 14 | Docs Over Outputs | Reference docs are authoritative, not past outputs |
-| 15 | Shared Constants | Colors, fonts, timing defined once |
-| 16 | Stage Manifests | Every stage writes manifest.md; skips write "skipped" |
-| 17 | Pipeline State | Central status table in `_config/` |
-| 18 | Parallel Branches | Letter-suffixed stages + merge stage |
-| 19 | Autonomy Flag | `guided` vs `autonomous` execution mode |
-| 20 | Critique Stage | Evaluate output against codified criteria |
-| 21 | Knowledge Base | Compiled wiki from raw intake documents |
-| 22 | Deliverables Stage | Reshape markdown into docx/xlsx/pptx |
+| 15 | Pipeline State | Central status table in `_config/` |
+| 16 | Parallel Branches | Letter-suffixed stages + merge stage |
+
+**Archetypes** (apply when triggered; may override core conventions)
+
+| ID | Archetype | Purpose |
+|----|-----------|---------|
+| A | Critique Stage | Evaluate output against codified criteria |
+| B | Knowledge Base Layer | Compiled wiki from raw intake documents |
+| C | Deliverables Stage | Reshape markdown into docx/xlsx/pptx |
 
 ## Attribution
 

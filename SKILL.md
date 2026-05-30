@@ -30,7 +30,7 @@ This skill operates in three modes. Full MWP conventions: `references/mwp-conven
 |------|--------|-------------|
 | **Build** | User describes a workflow; no existing workspace at target path | Scaffold complete workspace |
 | **Update** | User wants to add stages to an existing workspace | Add stages; patch CLAUDE.md only |
-| **Advisory** | User asks a structural question or needs MWP guidance | Answer citing patterns by name |
+| **Advisory** | User asks a structural question or needs MWP guidance | Answer citing conventions by name |
 
 | Trigger | Action |
 |---------|--------|
@@ -114,19 +114,17 @@ artifact. Stages should not fetch data AND filter it -- those are two stages.
 - 4-6 stages: multi-phase workflows (e.g. research -> draft -> edit -> format -> distribute)
 
 When the workflow includes open-ended generation where output quality is uncertain, consider
-a dedicated critique stage (Pattern 20 in `references/mwp-conventions.md` -- 3-condition rule).
+a dedicated critique stage (Archetype A in `references/mwp-conventions.md` -- 3-condition rule).
 
 When the workflow involves building a growing body of reference knowledge from incoming
-documents, suggest using the knowledge-base workspace (`~/Documents/workspaces/knowledge-base/`)
-rather than embedding ingest logic inside a regular stage (Pattern 21).
+documents, suggest a knowledge-base workspace rather than embedding ingest logic inside a
+regular stage (Archetype B in `references/mwp-conventions.md`).
 
 When the workflow description mentions presenting to leadership, peer review documents,
 formatted reports, Excel scorecards, or PowerPoint decks, add a final deliverables stage
-that reshapes upstream markdown into docx/xlsx/pptx (Pattern 22 in
+that reshapes upstream markdown into docx/xlsx/pptx (Archetype C in
 `references/mwp-conventions.md`). The deliverables stage creates no new content -- it
-packages what earlier stages produced. Reference implementation:
-`~/Documents/workspaces/cybersecurity/stages/05-deliverables/` and
-`~/Documents/workspaces/cybersecurity/shared/deliverables.py`.
+packages what earlier stages produced.
 
 Stage names are lowercase verb phrases: `research`, `draft`, `critique`, `edit`, `format`, `distribute`, `deliverables`.
 
@@ -177,10 +175,10 @@ Use when the user wants to add stages to an existing workspace.
 Use when the user asks a structural question, wants to understand MWP conventions, or
 needs help deciding how to organise their workspace.
 
-1. **Load conventions** -- read `references/mwp-conventions.md` for the full MWP pattern set. Use it to answer questions accurately and cite patterns by name.
+1. **Load conventions** -- read `references/mwp-conventions.md` for the full MWP convention and archetype set. Use it to answer questions accurately and cite conventions or archetypes by name.
 2. **Read the workspace if relevant** -- if the question is about a specific existing workspace, use Glob to read its structure first.
-3. **Answer the question** -- cite the relevant MWP pattern by name (e.g. "Per Pattern 5: Canonical Sources, this belongs in `_config/` not duplicated in each stage").
-4. **Recommend scripts for mechanical work** -- if the question involves deterministic work that does not need AI (fetching data, moving files, formatting output, sending email), recommend a local script instead of a stage. Per Pattern 7, scripts go in the relevant stage's `references/` folder, or in `shared/` if used across multiple stages.
+3. **Answer the question** -- cite the relevant convention or archetype by name (e.g. "Per Convention 5: Canonical Sources, this belongs in `_config/` not duplicated in each stage").
+4. **Recommend scripts for mechanical work** -- if the question involves deterministic work that does not need AI (fetching data, moving files, formatting output, sending email), recommend a local script instead of a stage. Per Convention 7, scripts go in the relevant stage's `references/` folder, or in `shared/` if used across multiple stages.
 
 ---
 
@@ -201,7 +199,7 @@ See `references/mwp-conventions.md` for the full set. Key rules:
 These apply when invoking the agent to run a workspace -- not part of scaffolding, but
 referenced from Build and Advisory modes.
 
-### /branch -- Parallel Stage Execution (Pattern 18)
+### /branch -- Parallel Stage Execution (Convention 16)
 
 `/branch` forks the current Claude Code session. The fork inherits full workspace context
 and diverges from that point forward. Use for parallel branches.
@@ -222,15 +220,14 @@ the workspace root. Use when a stage needs live data from another project withou
 
 | Workspace / Stage | --add-dir target | Why |
 |-------------------|------------------|-----|
-| cyber-insurance-market / 01-research | CRP/src/fair/benchmarks/ | Nordic fine priors for loss magnitude estimates |
-| cyber-insurance-market / 02-vetting | CRP/src/fair/ | Verify FAIR parameter ranges against live values |
-| cybersecurity / 02-architecture | cyber-insurance-market/stages/01-research/output/ | Cross-reference market intel |
-| Any workspace / any stage | AI_allowed/Cyber Insurance/wiki/ | CI knowledge base (Pattern 21) |
-| Any workspace / any stage | AI_allowed/Cybersecurity/wiki/ | CS knowledge base (Pattern 21) |
+| {workspace-a} / 01-research | {project}/src/benchmarks/ | Access benchmark data without copying |
+| {workspace-a} / 02-vetting | {project}/src/models/ | Verify parameter ranges against live values |
+| {workspace-b} / 02-analysis | {workspace-a}/stages/01-research/output/ | Cross-reference upstream output |
+| Any workspace / any stage | {knowledge-base-wiki-path}/ | Knowledge base layer (Archetype B) |
 
 `--add-dir` is read-only access for consuming workspaces -- outputs still go to the stage's
-own `output/` folder. Exception: knowledge-base workspace's `run-ingest.sh` handles
-`--add-dir` internally for each domain.
+own `output/` folder. Exception: Archetype B (Knowledge Base Layer) workspaces handle
+`--add-dir` internally via `run-ingest.sh` for each domain.
 
 ---
 
@@ -240,9 +237,9 @@ own `output/` folder. Exception: knowledge-base workspace's `run-ingest.sh` hand
 |---------|-------------|-----|
 | Stage does two jobs (fetch AND filter) | Bloated context, hard to restart in isolation | Split into two stages with single-purpose rule |
 | Hardcoded filenames in downstream Inputs | Handoff breaks when topic slug changes | Always read `manifest.md` first to get exact filenames |
-| Reference material inside CONTEXT.md | CONTEXT.md grows past 80 lines; violates Pattern 6 | Move content to `references/`; CONTEXT.md only routes |
-| Duplicated config across stages | Config drift between stages | One home in `_config/`; stages point to it (Pattern 5) |
-| Back-references (Stage 2 reads Stage 3) | Circular dependency; breaks restartability | One-way only: downstream reads upstream (Pattern 3) |
+| Reference material inside CONTEXT.md | CONTEXT.md grows past 80 lines; violates Convention 6 | Move content to `references/`; CONTEXT.md only routes |
+| Duplicated config across stages | Config drift between stages | One home in `_config/`; stages point to it (Convention 5) |
+| Back-references (Stage 2 reads Stage 3) | Circular dependency; breaks restartability | One-way only: downstream reads upstream (Convention 3) |
 | Skipping preflight check on Stage 01 | Pipeline runs unconfigured; garbage output | Always include workspace-config.md existence check as step 1 |
 | No manifest on conditional exit | Downstream stage reads stale or missing manifest | Skipped stages write `Status: skipped` manifest with reason |
 | Mixing Layer 3 and Layer 4 concerns | Stable references polluted by run-specific data | Layer 3 = factory (stable); Layer 4 = product (per-run) |

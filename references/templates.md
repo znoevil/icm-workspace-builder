@@ -82,7 +82,7 @@ Generate all files in one pass -- do not pause for confirmation between files.
 2. {Next action}
 3. ...
 N. Write `output/manifest.md` listing every artifact produced this stage (see Manifest rule below)
-N+1. Write `completed` status to `../../_config/pipeline-state.md` for this stage
+N+1. Write `complete` status to `../../_config/pipeline-state.md` for this stage
 
 ## Outputs
 
@@ -138,7 +138,7 @@ remain stable across runs. You only need to do this once.
 N-1. Stakeholder outputs: do you need formatted deliverables (docx assessment, xlsx
      scorecard, pptx executive deck) for presenting to leadership, peers, or external
      reviewers? (default: no -- if yes, a deliverables stage is added as the final
-     pipeline stage per Pattern 22)
+     pipeline stage per Archetype C)
 
 N. Execution mode: should pipeline stages pause for human review at checkpoints, or run
    unattended? (default: guided -- stages pause at review checkpoints; use autonomous for
@@ -148,7 +148,7 @@ N. Execution mode: should pipeline stages pause for human review at checkpoints,
 Questions are workspace-specific: brand, audience, output format, tone, language, naming conventions, etc. Do not ask about things that can be derived. Provide sensible defaults in parentheses.
 
 If the stakeholder outputs question is answered "yes", add a deliverables stage as the
-final pipeline stage. Follow Pattern 22 in `references/mwp-conventions.md` for the
+final pipeline stage. Follow Archetype C in `references/mwp-conventions.md` for the
 CONTEXT.md structure, reference files, and shared script. Create:
 - `stages/0N-deliverables/CONTEXT.md` (inputs from reporting + analysis stages)
 - `stages/0N-deliverables/references/docx-structure.md`

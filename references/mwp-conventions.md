@@ -1,6 +1,6 @@
 # MWP Conventions Reference
 
-Source: Interpretable Context Methodology (ICM) — Van Clief & McDermott, 2025.
+Source: Interpretable Context Methodology (ICM) -- Van Clief & McDermott, 2025.
 Reference repo: github.com/RinDig/Interpreted-Context-Methdology
 
 ---
@@ -29,59 +29,66 @@ When to cite these terms in Advisory mode:
 | 4 | `stages/0N-name/output/` | What am I working with? | varies |
 
 Layers 0-2 are structural routing (stable across runs).
-Layer 3 is reference material — the factory (stable across runs).
-Layer 4 is working artifacts — the product (changes each run).
+Layer 3 is reference material -- the factory (stable across runs).
+Layer 4 is working artifacts -- the product (changes each run).
 
 Total context per stage: typically 2,000-8,000 tokens.
 
 ---
 
-## The 21 Patterns
+## 16 Core Conventions
 
-**Pattern 1: Stage Contracts**
+These conventions apply to every MWP workspace. They are the grammar of the methodology.
+
+**Convention 1: Stage Contracts**
 Every stage CONTEXT.md has three sections: Inputs (table), Process (numbered steps), Outputs (table). This is the contract between stages.
 
-**Pattern 2: Stage Handoffs via Output Folders**
-Stage N writes to `stages/0N-name/output/`. Stage N+1 reads from `../0N-name/output/`. File naming: `{topic-slug}-{artifact-type}.md`.
+**Convention 2: Stage Handoffs**
+Stage N writes to `stages/0N-name/output/`. Stage N+1 reads from `../0N-name/output/`. Every stage writes `output/manifest.md` as its final step listing exact filenames produced; downstream stages read the manifest before loading any artifact. A skipped stage writes a manifest with `Status: skipped` and a one-line reason instead of artifacts. File naming: `YYYY-MM-DD-{topic-slug}-{artifact-type}.md`.
 
-**Pattern 3: One-Way Cross-References**
+**Convention 3: One-Way Cross-References**
 Folders point outward only. No back-references. Stage 3 can reference Stage 2's output; Stage 2 must not reference Stage 3.
 
-**Pattern 4: Selective Section Routing**
+**Convention 4: Selective Section Routing**
 CONTEXT.md Inputs tables reference specific sections of files, not whole files. Format: `| file.md | "Voice Rules" through "What the Voice Is NOT" | Tone guidance |`
 
-**Pattern 5: Canonical Sources**
-Every piece of information has one home. Other files point to it; they do not duplicate it.
+**Convention 5: Canonical Sources**
+Every piece of information has one home. Other files point to it; they do not duplicate it. For code-producing workspaces, this extends to shared constant files (colors, fonts, timing, layout) in `shared/`, populated once during onboarding.
 
-**Pattern 6: CONTEXT.md = Routing, Not Content**
+**Convention 6: CONTEXT.md = Routing, Not Content**
 CONTEXT.md answers: What is this folder? What do I load? What is the process? Never contains actual reference material. Target: 25-80 lines.
 
-**Pattern 7: Tool Prerequisites**
+**Convention 7: Tool Prerequisites**
 Setup guides for external tools (Node.js, ffmpeg, scripts) live in `references/` of the stage that uses them. Multi-stage tools go in `shared/`. Use local scripts for deterministic work that does not need AI: fetching data, moving files, formatting output, sending emails.
 
-**Pattern 8: Questionnaire Design**
+**Convention 8: Questionnaire Design**
 `setup/questionnaire.md` is flat, all-at-once, system-level only. Derive what can be derived. Sensible defaults. Ask once, never again.
 
-**Pattern 9: Bundled Skills**
+**Convention 9: Bundled Skills**
 Workspaces can include a `skills/` folder with Claude Code skills. Stage CONTEXT.md Inputs tables reference them. Replaces custom reference docs when an official skill covers the ground.
 
-**Pattern 10: Specs Are Contracts**
+**Convention 10: Specs Are Contracts**
 Spec stages define WHAT and WHEN, not HOW. No implementation details in specs.
 
-**Pattern 11: Checkpoints**
-Creative stages pause for human steering between process steps. Table format: `| After Step | Agent Presents | Human Decides |`
+**Convention 11: Checkpoints**
+Creative stages pause for human steering between process steps. Table format: `| After Step | Agent Presents | Human Decides |`. Autonomy: `workspace-config.md` includes `execution_mode: guided | autonomous`. Checkpoint steps append `(Skip if execution_mode = autonomous)` to make them optional for unattended runs without removing them from guided runs. Default is `guided`.
 
-**Pattern 12: Stage Audits**
+**Convention 12: Stage Audits**
 Creative/build stages run a checklist after completing work but before writing to `output/`. If any check fails, agent revises before saving.
 
-**Pattern 13: Value Validation**
+**Convention 13: Value Validation**
 Content stages define value types (NOVEL, USABLE, QUESTION-GENERATING) and agree with human on which types the piece will hit before main creative work begins.
 
-**Pattern 14: Docs Over Outputs**
+**Convention 14: Docs Over Outputs**
 Reference docs are authoritative for how to build. Previous outputs in `output/` are artifacts, not templates. Agents must not read other outputs to learn patterns.
 
-**Pattern 15: Shared Constants**
-Code-producing workspaces define shared constant files (colors, fonts, timing, layout) populated once during onboarding.
+**Convention 15: Pipeline State**
+`_config/pipeline-state.md` is a table (Stage, Status, Last Run, Notes) that stages update on completion (`complete`, `failed`, or `skipped`). The `status` trigger reads this file. Recovery from failure is a human responsibility; this convention provides detection, not retry.
+
+**Convention 16: Parallel Branches**
+Parallel stages share the same number with a letter suffix (`01a-`, `01b-`). A merge stage at the next number (`02-merge`) lists both in its Inputs table. Both branch stages appear in `pipeline-state.md` and the root Folder Map. Branches run as separate agent invocations; the merge stage synthesises them.
+
+Recommended invocation: use `/branch` (or `claude --resume <id> --fork-session`) to fork the current session before running each parallel stage. The forked session inherits workspace context and diverges from that point forward. The original session remains authoritative for the merge stage. The merge stage must check that both branch rows in `pipeline-state.md` show `complete` before proceeding; if either is `skipped` or `failed`, it exits with a `Status: skipped` manifest noting which branch was incomplete.
 
 ---
 
@@ -90,7 +97,7 @@ Code-producing workspaces define shared constant files (colors, fonts, timing, l
 - Folders and files: `lowercase-with-hyphens`
 - Stage folders: zero-padded prefix: `01-`, `02-`, `03-`
 - Placeholders: `{{SCREAMING_SNAKE_CASE}}`
-- Output artifacts: `{topic-slug}-{artifact-type}.md`
+- Output artifacts: `YYYY-MM-DD-{topic-slug}-{artifact-type}.md`
 - No spaces anywhere in file or folder names
 
 ## Quality Guardrails
@@ -102,21 +109,14 @@ Code-producing workspaces define shared constant files (colors, fonts, timing, l
 - Empty persistent folders get `.gitkeep`
 - Every markdown file readable by someone with markdown/git basics but no engineering background
 
-**Pattern 16: Stage Manifests**
-Every stage writes `output/manifest.md` as its final step, listing exact filenames produced. Downstream stages read the manifest before loading any artifact. A skipped stage writes `Status: skipped` with a one-line reason instead of artifacts. This makes handoffs deterministic and skips detectable.
+---
 
-**Pattern 17: Pipeline State**
-`_config/pipeline-state.md` is a table (Stage, Status, Last Run, Notes) that stages update on completion (`complete`, `failed`, or `skipped`). The `status` trigger reads this file. Recovery from failure is a human responsibility; this pattern provides detection, not retry.
+## Archetypes
 
-**Pattern 18: Parallel Branches**
-Parallel stages share the same number with a letter suffix (`01a-`, `01b-`). A merge stage at the next number (`02-merge`) lists both in its Inputs table. Both branch stages appear in `pipeline-state.md` and the root Folder Map. Branches run as separate agent invocations; the merge stage synthesises them.
+Archetypes are reusable workspace patterns that apply when triggered by specific workflow needs. Unlike core conventions (which apply to every workspace), archetypes introduce their own internal structure and may extend or override core conventions. Each archetype documents which conventions it deviates from.
 
-Recommended invocation: use `/branch` (or `claude --resume <id> --fork-session`) to fork the current session before running each parallel stage. The forked session inherits workspace context and diverges from that point forward. The original session remains authoritative for the merge stage. The merge stage must check that both branch rows in `pipeline-state.md` show `complete` before proceeding; if either is `skipped` or `failed`, it exits with a `Status: skipped` manifest noting which branch was incomplete.
+**Archetype A: Critique Stage**
 
-**Pattern 19: Autonomy Flag**
-`workspace-config.md` includes `execution_mode: guided | autonomous`. Stages with human-review checkpoints append `(Skip if execution_mode = autonomous)` to those steps. Default is `guided`. This makes checkpoints optional for unattended runs without removing them from guided runs.
-
-**Pattern 20: Critique Stage**
 A critique stage evaluates a previous stage's primary artifact against codified criteria and surfaces issues before the pipeline continues. It is a distinct stage, not a review step inside an existing stage.
 
 Use a dedicated critique stage when all three conditions hold:
@@ -124,11 +124,11 @@ Use a dedicated critique stage when all three conditions hold:
 2. The evaluation criteria can be written as a checklist ahead of time (not a judgment call)
 3. Re-running the previous stage is worthwhile if issues are found
 
-Use a checkpoint (Pattern 11) inside a stage instead when: the review is a single human judgment call that cannot be codified, or when the criteria only become clear during the run.
+Use a checkpoint (Convention 11) inside a stage instead when: the review is a single human judgment call that cannot be codified, or when the criteria only become clear during the run.
 
 Structure:
 - **Inputs:** Previous stage's primary artifact + a criteria file from `references/` (Layer 3 -- stable, not run-specific)
-- **Process:** Evaluate artifact against each criterion; classify each finding as Blocking or Advisory; write critique artifact; if Blocking issues found, add a checkpoint (Pattern 11) before proceeding
+- **Process:** Evaluate artifact against each criterion; classify each finding as Blocking or Advisory; write critique artifact; if Blocking issues found, add a checkpoint (Convention 11) before proceeding
 - **Outputs:** `YYYY-MM-DD-{topic}-critique.md` (findings table: criterion, result, severity, note) + manifest
 
 Key rules:
@@ -137,7 +137,8 @@ Key rules:
 - Status is always `complete` (the critique ran); Blocking issues are surfaced via checkpoint, not via `failed` status
 - Add a `0N-critique` row to `pipeline-state.md`; human records the checkpoint outcome in the Notes column
 
-**Pattern 21: Knowledge Base Layer**
+**Archetype B: Knowledge Base Layer**
+
 Use when a workspace's Layer 3 references need to grow and stay current from a stream of incoming source documents, rather than being set once at setup.
 
 Core concept: separate immutable intake (`raw/`) from compiled structured knowledge (`wiki/`). An LLM-driven pipeline ingests source documents and compiles them into an incrementally growing wiki of interlinked markdown pages. Knowledge is compiled once on ingest, not rediscovered on every query -- unlike per-query RAG.
@@ -153,15 +154,14 @@ Multi-domain configuration: a single knowledge-base workspace can serve multiple
 
 Parallel execution: when multiple domains share the same inbox, run all domain ingests in parallel using a shell script (`shared/run-ingest.sh`) that fires one `claude -p` process per domain, each with its own `--add-dir {wiki_path}`. Set `execution_mode: autonomous` in the shared config so stages skip checkpoints and complete without interaction. Pipeline state tracks per-domain status with a Domain column: `| Stage | Domain | Status | Last Run | Notes |`.
 
-Deviation from standard MWP: Stage 02-compile writes directly to `wiki/` in place (not to a per-run `output/` folder). This is intentional -- wiki pages are cumulative artifacts, not run-specific outputs. Document this explicitly in the workspace CLAUDE.md.
+Convention deviations: Stage 02-compile writes directly to `wiki/` in place, not to a per-run `output/` folder. This overrides Convention 2 (Stage Handoffs). Wiki pages are cumulative artifacts, not run-specific outputs. Document this explicitly in the workspace CLAUDE.md.
 
-Consuming workspaces: use `--add-dir <wiki_path>` at session start; reference specific wiki pages in stage Inputs tables (Pattern 4: Selective Section Routing).
+Consuming workspaces: use `--add-dir <wiki_path>` at session start; reference specific wiki pages in stage Inputs tables (Convention 4: Selective Section Routing).
 
 Webclipper integration: Obsidian Webclipper saves clips as markdown with frontmatter (title, URL, date, tags) to the configured raw_source_path. Stage 01-ingest reads the processed-log to skip already-compiled clips, processes only new ones.
 
-Reference workspace: `~/Documents/workspaces/knowledge-base/`
+**Archetype C: Deliverables Stage**
 
-**Pattern 22: Deliverables Stage**
 Use when a workflow produces reports, assessments, or analysis that must be presented to stakeholders in formatted documents (docx, xlsx, pptx) beyond markdown and PDF.
 
 Core concept: a final stage that reads upstream stage outputs and reshapes them into presentation-ready formats. It creates no new content -- it formats what stages before it already produced. This separates content production (analysis, documentation, reporting) from content packaging (formatted deliverables).
@@ -183,14 +183,12 @@ When to suggest: if the user's workflow description mentions "presenting to lead
 
 Dependencies: `python-docx`, `openpyxl`, `python-pptx`, `pillow`. Install in a workspace-local venv.
 
-Reference implementation: `~/Documents/workspaces/cybersecurity/stages/05-deliverables/` and `~/Documents/workspaces/cybersecurity/shared/deliverables.py`.
-
 ---
 
 ## Trigger Keywords
 
-- `setup` — Starts onboarding; agent reads `setup/questionnaire.md`, populates `_config/`
-- `status` — Reads `_config/pipeline-state.md`; shows per-stage Status, Last Run, and Notes as an ASCII table
+- `setup` -- Starts onboarding; agent reads `setup/questionnaire.md`, populates `_config/`
+- `status` -- Reads `_config/pipeline-state.md`; shows per-stage Status, Last Run, and Notes as an ASCII table
 
 ## Layer 3 vs Layer 4
 
