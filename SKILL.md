@@ -138,7 +138,7 @@ Use the templates in `references/templates.md` for file content. Generate:
 - Each `stages/0N-{name}/CONTEXT.md` (Layer 2) -- stage contract with Inputs, Process, Outputs
 - `setup/questionnaire.md` -- workspace-specific onboarding questions
 - `_config/pipeline-state.md` -- one row per stage, all pending
-- `.claude/settings.json` -- SessionStart hook for automatic pipeline status display
+- `.claude/settings.json` -- SessionStart hook for automatic pipeline status display (use the bash or PowerShell variant from `references/templates.md` based on the user's platform)
 - `.gitkeep` files for empty persistent folders (`shared/`, each stage's `references/`, `output/`)
 
 ### Step 4: Report

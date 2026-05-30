@@ -175,6 +175,10 @@ Add one row per stage. Stages write `complete`, `failed`, or `skipped` here as t
 
 ## .claude/settings.json (SessionStart hook)
 
+Detect the platform at build time and use the appropriate command.
+
+**macOS / Linux (bash):**
+
 ```json
 {
   "hooks": {
@@ -183,7 +187,26 @@ Add one row per stage. Stages write `complete`, `failed`, or `skipped` here as t
         "hooks": [
           {
             "type": "command",
-            "command": "[ -f _config/pipeline-state.md ] && (echo '--- Pipeline State ---' && cat _config/pipeline-state.md && echo '' && echo '--- Last Session ---' && tail -20 _config/session-log.md) || echo 'Workspace not configured. Run setup.'"
+            "command": "if [ -f _config/pipeline-state.md ]; then echo '--- Pipeline State ---' && cat _config/pipeline-state.md && echo '' && echo '--- Last Session ---' && { [ -f _config/session-log.md ] && tail -20 _config/session-log.md || echo 'No session log yet.'; }; else echo 'Workspace not configured. Run setup.'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Windows (PowerShell):**
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -Command \"if (Test-Path _config/pipeline-state.md) { Write-Output '--- Pipeline State ---'; Get-Content _config/pipeline-state.md; Write-Output ''; Write-Output '--- Last Session ---'; if (Test-Path _config/session-log.md) { Get-Content _config/session-log.md -Tail 20 } else { Write-Output 'No session log yet.' } } else { Write-Output 'Workspace not configured. Run setup.' }\""
           }
         ]
       }

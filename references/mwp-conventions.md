@@ -136,6 +136,7 @@ Key rules:
 - It does NOT re-run the previous stage -- if Blocking issues are found, the pipeline pauses at a checkpoint and the human decides: fix and re-run the prior stage, or accept and proceed
 - Status is always `complete` (the critique ran); Blocking issues are surfaced via checkpoint, not via `failed` status
 - Add a `0N-critique` row to `pipeline-state.md`; human records the checkpoint outcome in the Notes column
+- For high-stakes or client-facing output, run the critique stage in a separate agent session (`/branch` or a new `claude` invocation) so the evaluator does not share the context window that produced the artifact. Same-agent self-critique tends to pass its own blind spots.
 
 **Archetype B: Knowledge Base Layer**
 

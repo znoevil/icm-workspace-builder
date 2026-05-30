@@ -91,7 +91,7 @@ my-workspace/
 
 ## Install
 
-Copy the skill into your Claude Code skills directory:
+**macOS / Linux:**
 
 ```bash
 cp -r icm-workspace-builder ~/.claude/skills/
@@ -102,6 +102,19 @@ Or clone and symlink:
 ```bash
 git clone https://github.com/znoevil/icm-workspace-builder.git
 ln -s "$(pwd)/icm-workspace-builder" ~/.claude/skills/icm-workspace-builder
+```
+
+**Windows (PowerShell):**
+
+```powershell
+Copy-Item -Recurse icm-workspace-builder $env:USERPROFILE\.claude\skills\
+```
+
+Or clone and symlink:
+
+```powershell
+git clone https://github.com/znoevil/icm-workspace-builder.git
+New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\icm-workspace-builder" -Target "$(Get-Location)\icm-workspace-builder"
 ```
 
 ## Usage
