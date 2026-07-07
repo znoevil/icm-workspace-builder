@@ -145,7 +145,7 @@ The stage owner (the session running the stage) extracts the work list, dispatch
 
 Rules:
 - Only the stage owner writes to `output/`, `manifest.md`, or `pipeline-state.md`. Workers return results to the owner; they never write stage artifacts. This keeps handoffs deterministic and the stage gate intact.
-- Every dispatch names an explicit model, at least one tier below the session model (mechanical verification: sonnet or haiku; open research: sonnet).
+- Every dispatch names an explicit model, at least one tier below the session model (mechanical verification: sonnet or haiku; open research: sonnet). Exception: verification-critical stages (Pattern 24) may run workers at session tier (opus) -- subtle verdict calls on legal and policy language justify the spend, and workers are the only ones who read the sources.
 - In `guided` mode, state the worker count and model before dispatching -- fan-out is a spending decision.
 - For verification work, frame workers adversarially ("try to refute this claim") -- independence from the authoring context is the point.
 - Judgment, filtering, synthesis, and gating stay with the stage owner. Work that needs whole-pipeline context is not a fan-out candidate.
